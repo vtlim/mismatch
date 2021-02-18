@@ -4,17 +4,17 @@
   <head>
     <title>Sequence Mismatch</title>
 
+    <!--Import ajax jquery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
     <!--Import favicon-->
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
     <!--Import Google Icon Font-->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!--Import materialize.css-->
+    <!--Import materialize.css and custom.css-->
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/materialize.min.css') }}"  media="screen,projection"/>
-    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}"  media="screen,projection"/>
-
-    <!--Import custom.css-->
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}"  media="screen,projection"/>
 
     <!--Let browser know website is optimized for mobile-->
@@ -35,35 +35,71 @@
       </nav>
     </div>
 
-  <div class="row">
-    <form method="POST" class="col s12" id="myform">
-      <div class="row">
-        <!------ LEFT SIDE STUFF ------>
-        <div class="input-field col s6">
-          <textarea id="text_lhs" name="text_lhs" class="materialize-textarea"></textarea>
-          <label for="text_lhs" class="active">Textarea</label>
-          <span class="helper-text">Helper text</span>
+    <div class="row">
+      <div class="col s12" id="myform">
+        <div class="row">
+          <!------ LEFT SIDE BOX ------>
+          <div class="input-field col s6">
+            <textarea id="text_lhs" name="text_lhs" class="materialize-textarea"></textarea>
+            <label for="text_lhs" class="active">Textarea</label>
+            <span class="helper-text">Helper text</span>
+          </div>
+
+          <!------ RIGHT SIDE BOX ------>
+          <div class="input-field col s6">
+            <textarea id="text_rhs" name="text_rhs" class="materialize-textarea"></textarea>
+            <label for="text_rhs" class="active">Textarea</label>
+            <span class="helper-text">Helper text</span>
+          </div>
+
         </div>
 
-        <!------ RIGHT SIDE STUFF ------>
-        <div class="input-field col s6">
-          <textarea id="text_rhs" name="text_rhs" class="materialize-textarea"></textarea>
-          <label for="text_rhs" class="active">Textarea</label>
-          <span class="helper-text">Helper text</span>
+        <!-- SUBMIT BUTTON -->
+        <div class="button-center">
+          <!-- todo: onclick="submitForm() does not seem to work -->
+          <button class="get_result btn waves-effect waves-light light-blue darken-2" type="submit" onclick="submitForm()">Submit</button>
         </div>
-
       </div>
+    </div>
 
-      <!-- SUBMIT BUTTON -->
-      <div class="button-center">
-        <button class="btn waves-effect waves-light light-blue darken-2" type="submit" onclick="submitForm()">Submit</button>
-      </div>
-    </form>
-  </div>
+
+    <div class='output_lhs'></div>
+    <div class='output_rhs'></div>
+
+
+
+
 
     <!--JavaScript at end of body for optimized loading-->
     <script type="text/javascript" src="{{ url_for('static', filename='js/custom.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='js/materialize.min.js') }}"></script>
 
   </body>
+
+  <script>
+    // when submit button is clicked, perform get request to obtain result
+    // of processing text_lhs and text_rhs through process_sequences. then
+    // send result to its assigned div tag in the body above
+    // https://stackoverflow.com/a/52345940
+    $(document).ready(function(){
+      $('#myform').on('click', '.get_result', function(){
+        var text_lhs = $("#text_lhs").val();
+        var text_rhs = $("#text_rhs").val();
+        $.ajax({
+          url: "/process_sequences",
+          type: "get",
+          data: {text_lhs:text_lhs, text_rhs:text_rhs},
+          success: function(response) {
+            $(".output_lhs").html('<p>'+response.result_lhs.toString()+'</p>');
+            $(".output_rhs").html('<p>'+response.result_rhs.toString()+'</p>');
+          },
+        });
+      });
+    });
+
+    // return list of indices to highlight from 0 to N (N total characters)
+    // using below, rewrite highLightAt to take a list of indexes to highlight
+    // https://stackoverflow.com/questions/35966821/using-jquery-to-highlight-a-character-of-a-string-on-a-webpage
+  </script>
+
 </html>

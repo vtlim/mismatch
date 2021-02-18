@@ -3,3 +3,15 @@
   position: relative;
   left: 47%;
 }
+
+/* EDIT FOCUS COLORS, purple darken-3 */
+/* https://stackoverflow.com/a/44417646 */
+/* label focus color */
+.input-field input[type=text]:focus + label, .materialize-textarea:focus:not([readonly]) + label {
+  color: #6a1b9a !important;
+}
+/* label underline focus color */
+.input-field input[type=text]:focus, .materialize-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid #6a1b9a !important;
+  box-shadow: 0 1px 0 0 #6a1b9a !important;
+}
