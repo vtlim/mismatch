@@ -27,9 +27,9 @@
     <div class="navbar-fixed" style="margin-bottom:30px; ">
       <nav>
         <div class="nav-wrapper light-blue darken-3">
-          <a href="#" class="brand-logo" style="margin-left:20px; ">Find mismatched base pairs between hybridized DNA sequences</a>
+          <a href="{{ url_for('index') }}" class="flow-text" style="margin-left:20px; ">Find mismatched base pairs between complementary DNA sequences</a>
           <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="https://github.com/vtlim">About</a></li>
+            <li><a href="{{ url_for('about') }}">About</a></li>
           </ul>
         </div>
       </nav>
@@ -41,15 +41,15 @@
           <!------ LEFT SIDE BOX ------>
           <div class="input-field col s6">
             <textarea id="text_lhs" name="text_lhs" class="materialize-textarea"></textarea>
-            <label for="text_lhs" class="active">Textarea</label>
-            <span class="helper-text">Helper text</span>
+            <label for="text_lhs" class="active">Reference sequence(s), 5' to 3'</label>
+            <span class="helper-text">Ex. GCCTCAGTCTGCTTCGCACC</span>
           </div>
 
           <!------ RIGHT SIDE BOX ------>
           <div class="input-field col s6">
             <textarea id="text_rhs" name="text_rhs" class="materialize-textarea"></textarea>
-            <label for="text_rhs" class="active">Textarea</label>
-            <span class="helper-text">Helper text</span>
+            <label for="text_rhs" class="active">Complementary sequence(s), 5' to 3'</label>
+            <span class="helper-text">Ex. GGTGCGATGCAGATTGAGTC</span>
           </div>
 
         </div>
@@ -63,10 +63,22 @@
     </div>
 
 
-    <div class='output_lhs'></div>
-    <div class='output_rhs'></div>
-
-
+    <h5 class='output_err' style="text-align:center; color:#ad1457"></h5>
+    <div class="row" id="outputrow">
+      <div class="col s6">
+        <label>Same reference, 5' to 3'</label>
+        <div class="card-panel">
+          <div class='output_lhs' style="font-family: monospace; word-break: break-all;"></div>
+        </div>
+      </div>
+      <div class="col s6">
+        <label>Reverse complement, 3' to 5'</label>
+        <div class="card-panel">
+          <div class='output_rhs' style="font-family: monospace; word-break: break-all;"></div>
+        </div>
+      </div>
+      <label style="display:block; text-align:center;">Mismatches are highlighted in blue.</label>
+    </div>
 
 
 
@@ -82,24 +94,52 @@
     // send result to its assigned div tag in the body above
     // https://stackoverflow.com/a/52345940
     $(document).ready(function(){
+      $('#outputrow').hide();
+
       $('#myform').on('click', '.get_result', function(){
         var text_lhs = $("#text_lhs").val();
         var text_rhs = $("#text_rhs").val();
+
         $.ajax({
           url: "/process_sequences",
           type: "get",
           data: {text_lhs:text_lhs, text_rhs:text_rhs},
           success: function(response) {
-            $(".output_lhs").html('<p>'+response.result_lhs.toString()+'</p>');
-            $(".output_rhs").html('<p>'+response.result_rhs.toString()+'</p>');
+            $('#outputrow').show();
+            $(".output_err").html(response.result_error.toString());
+
+            // get response from python fx
+            var pre_lhs = response.result_lhs.toString();
+            var pre_rhs = response.result_rhs.toString();
+            var indexList = response.indexList;
+
+            // highlight specified indexes
+            var hlt_lhs = pre_lhs.highlighter(indexList);
+            var hlt_rhs = pre_rhs.highlighter(indexList);
+
+            // assign result to its div tag
+            $(".output_lhs").html(hlt_lhs);
+            $(".output_rhs").html(hlt_rhs);
           },
         });
       });
     });
 
-    // return list of indices to highlight from 0 to N (N total characters)
-    // using below, rewrite highLightAt to take a list of indexes to highlight
-    // https://stackoverflow.com/questions/35966821/using-jquery-to-highlight-a-character-of-a-string-on-a-webpage
+    // higlighter function adds a highlight span tag around each
+    // character whose index is specified in the input list
+    // https://stackoverflow.com/a/35967029
+    String.prototype.highlighter = function(indexList) {  
+      var myString = this;
+
+      // iterate in reverse so the span tags don't interfere with index
+      for (var i=indexList.length-1; i>=0; i--) {
+        var index = indexList[i];
+        var myString = myString.substr(0, index) + 
+                       '<span class="highlight">' + myString.substr(index, 1) + '</span>' +
+                       myString.substr(index+1);
+      }
+      return myString
+    }
   </script>
 
 </html>

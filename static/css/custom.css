@@ -1,7 +1,13 @@
 .button-center {
   float: left;
   position: relative;
-  left: 47%;
+  left: 46.7%;
+}
+
+/* highlight text with light-blue lighten-4 */
+.highlight {
+  background-color: #b3e5fc;
+  color: black;
 }
 
 /* EDIT FOCUS COLORS, purple darken-3 */
@@ -14,4 +20,7 @@
 .input-field input[type=text]:focus, .materialize-textarea:focus:not([readonly]) {
   border-bottom: 1px solid #6a1b9a !important;
   box-shadow: 0 1px 0 0 #6a1b9a !important;
+}
+
+.about-card {
 }
